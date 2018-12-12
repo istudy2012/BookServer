@@ -1,7 +1,8 @@
-package bookserver.controller;
+package bookserver.user.controller;
 
-import bookserver.model.User;
-import bookserver.model.UserRepository;
+import bookserver.error.ErrorStatus;
+import bookserver.user.entity.User;
+import bookserver.user.repository.UserRepository;
 import bookserver.util.ResponseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +45,7 @@ public class UserController {
         if (userOptional.isPresent()) {
             return ResponseUtils.success(userOptional.get());
         } else {
-            return ResponseUtils.failure(404, ResponseUtils.createErrorMessage(
-                    "user.notFound", "can not find user"));
+            return ResponseUtils.failure(404, ErrorStatus.USER_NOT_EXIST);
         }
     }
 
@@ -60,17 +60,20 @@ public class UserController {
     @ResponseBody
     public Object postUserInfo(@PathVariable Long id, @RequestBody User user) {
         if (!userRepository.existsById(id)) {
-            return ResponseUtils.failure(404, "user.notExist", "no user: " + user.getId());
+            return ResponseUtils.failure(404, ErrorStatus.USER_NOT_EXIST);
         }
 
         Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isPresent()) {
             User newUser = userOptional.get();
-            if (user.getName() != null) {
-                newUser.setName(user.getName());
+            if (user.getUserName() != null) {
+                newUser.setUserName(user.getUserName());
             }
-            if (user.getAvatar() != null) {
-                newUser.setAvatar(user.getAvatar());
+            if (user.getNickName() != null) {
+                newUser.setNickName(user.getNickName());
+            }
+            if (user.getUserAvatar() != null) {
+                newUser.setUserAvatar(user.getUserAvatar());
             }
 
             userRepository.save(newUser);
@@ -83,7 +86,7 @@ public class UserController {
     @ResponseBody
     public Object deleteUserInfo(@PathVariable Long id) {
         if (!userRepository.existsById(id)) {
-            return ResponseUtils.failure(404, "user.notExist", "no user");
+            return ResponseUtils.failure(404, ErrorStatus.USER_NOT_EXIST);
         }
         userRepository.deleteById(id);
         return ResponseUtils.delete();

@@ -1,32 +1,34 @@
-package bookserver.manager;
+package bookserver.token.manager.impl;
 
 import bookserver.config.RedisConfig;
-import bookserver.model.TokenModel;
+import bookserver.token.manager.TokenManager;
+import bookserver.token.model.TokenModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 @Component
 public class RedisTokenManager implements TokenManager {
 
-    private RedisTemplate redis;
-
     @Autowired
-    public void setRedis(RedisTemplate redis) {
-        this.redis = redis;
-        //泛型设置成Long后必须更改对应的序列化方案
-        redis.setKeySerializer(new JdkSerializationRedisSerializer());
-    }
+    private RedisTemplate redisTemplate;
+
+//    @Autowired
+//    public void setRedisTemplate(RedisTemplate redisTemplate) {
+//        this.redis = redisTemplate;
+//        //泛型设置成Long后必须更改对应的序列化方案
+//        redis.setKeySerializer(new JdkSerializationRedisSerializer());
+//    }
 
     @Override
-    public TokenModel createToken(long userId) {
+    public TokenModel createToken(String userId) {
         String token = UUID.randomUUID().toString().replace("-", "");
         TokenModel model = new TokenModel(userId, token);
-        redis.boundValueOps(userId).set(token, RedisConfig.TOKEN_EXPIRE_TIME, RedisConfig.TOKEN_EXPIRE_TIME_UNIT);
+        redisTemplate.boundValueOps(userId).set(token, RedisConfig.TOKEN_EXPIRE_TIME, RedisConfig.TOKEN_EXPIRE_TIME_UNIT);
         return model;
     }
 
@@ -35,12 +37,12 @@ public class RedisTokenManager implements TokenManager {
         if (model == null) {
             return false;
         }
-        String token = (String) redis.boundValueOps(model.getUserId()).get();
+        String token = (String) redisTemplate.boundValueOps(model.getUserId()).get();
         if (token == null || !token.equals(model.getToken())) {
             return false;
         }
         //如果验证成功，说明此用户进行了一次有效操作，延长token的过期时间
-        redis.boundValueOps(model.getUserId()).expire(RedisConfig.TOKEN_EXPIRE_TIME, RedisConfig.TOKEN_EXPIRE_TIME_UNIT);
+        redisTemplate.boundValueOps(model.getUserId()).expire(RedisConfig.TOKEN_EXPIRE_TIME, RedisConfig.TOKEN_EXPIRE_TIME_UNIT);
         return true;
     }
 
@@ -53,13 +55,13 @@ public class RedisTokenManager implements TokenManager {
         if (param.length != 2) {
             return null;
         }
-        Long userId = Long.parseLong(param[0]);
+        String userId = param[0];
         String token = param[1];
         return new TokenModel(userId, token);
     }
 
     @Override
-    public void deleteToken(long userId) {
-        redis.delete(userId);
+    public void deleteToken(String userId) {
+        redisTemplate.delete(userId);
     }
 }

@@ -1,15 +1,15 @@
 package bookserver.message;
 
 public class ErrorMessage {
-    private String key;
+    private int code;
     private String message;
 
-    public String getKey() {
-        return key;
+    public int getCode() {
+        return code;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setCode(int code) {
+        this.code = code;
     }
 
     public String getMessage() {

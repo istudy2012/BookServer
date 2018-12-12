@@ -1,5 +1,6 @@
-package bookserver.model;
+package bookserver.user.repository;
 
+import bookserver.user.entity.User;
 import org.springframework.data.repository.CrudRepository;
 
 // This will be AUTO IMPLEMENTED by Spring into a Bean called userRepository
@@ -7,4 +8,5 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface UserRepository extends CrudRepository<User, Long> {
 
+    User findByNameAndPassword(String userName, String password);
 }

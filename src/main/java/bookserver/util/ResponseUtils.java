@@ -1,5 +1,6 @@
 package bookserver.util;
 
+import bookserver.error.ErrorStatus;
 import bookserver.message.ErrorMessage;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -23,12 +24,8 @@ public class ResponseUtils {
         return failure(status, null);
     }
 
-    public static ResponseEntity failure(int status, Object body) {
-        return ResponseEntity.status(status).body(body);
-    }
-
-    public static ResponseEntity failure(int status, String key, String message) {
-        return failure(status, createErrorMessage(key, message));
+    public static ResponseEntity failure(int status, ErrorStatus errorStatus) {
+        return ResponseEntity.status(status).body(createErrorMessage(errorStatus));
     }
 
     public static ResponseEntity create() {
@@ -48,7 +45,7 @@ public class ResponseUtils {
     }
 
     public static ResponseEntity response(int status, Object body) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(body);
+        return ResponseEntity.status(status).body(body);
     }
 
     public static Map<String, Object> createData(Object data) {
@@ -57,10 +54,17 @@ public class ResponseUtils {
         return map;
     }
 
-    public static ErrorMessage createErrorMessage(String errorKey, String message) {
+    public static ErrorMessage createErrorMessage(int code, String message) {
         ErrorMessage errorMessage = new ErrorMessage();
-        errorMessage.setKey(errorKey);
+        errorMessage.setCode(code);
         errorMessage.setMessage(message);
+        return errorMessage;
+    }
+
+    public static ErrorMessage createErrorMessage(ErrorStatus errorStatus) {
+        ErrorMessage errorMessage = new ErrorMessage();
+        errorMessage.setCode(errorStatus.getCode());
+        errorMessage.setMessage(errorStatus.getMessage());
         return errorMessage;
     }
 }

@@ -1,23 +1,23 @@
-package bookserver.model;
+package bookserver.token.model;
 
 public class TokenModel {
 
-    private Long userId;
+    private String userId;
     private String token;
 
     public TokenModel() {
     }
 
-    public TokenModel(Long userId, String token) {
+    public TokenModel(String userId, String token) {
         this.userId = userId;
         this.token = token;
     }
 
-    public Long getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
